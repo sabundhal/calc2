@@ -16,7 +16,8 @@ USERS = [
         'password': 'test'
     }
 ]
-
+####222
+##1111
 # Генератор нового ID
 def generate_id():
     return max(book['id'] for book in BOOKS) + 1 if BOOKS else 1
