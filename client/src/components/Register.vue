@@ -88,7 +88,7 @@ export default {
   },
   methods: {
     registerUser(payload) {
-      const path = `${config.apiUrl}/api/register`;
+      const path = `/api/register`;
       axios.post(path, payload)
         .then(() => {
           this.message = 'Пользователь зарегистрирован!';

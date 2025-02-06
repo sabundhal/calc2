@@ -60,7 +60,7 @@ export default {
   },
   methods: {
   loginUser(payload) {
-    const path = `${config.apiUrl}/api/login`;
+    const path = `/api/login`;
     axios.post(path, payload)
       .then((response) => {
         const token = response.data.access_token; 

@@ -1,6 +1,38 @@
 from flask import Flask, jsonify, request
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
+import sqlite3
+import hashlib
+
+##BD
+conn = sqlite3.connect('myapp.db', check_same_thread=False)
+cursor = conn.cursor()
+
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS users
+                  (id INTEGER PRIMARY KEY, username TEXT, email TEXT UNIQUE, password TEXT)''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS products
+                  (id INTEGER PRIMARY KEY, name TEXT, category TEXT, price REAL, discount REAL)''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS carts
+                  (id INTEGER PRIMARY KEY, user_id INTEGER, total_price REAL, total_discount REAL)''')
+
+cursor.execute('''CREATE TABLE IF NOT EXISTS cart_items
+                  (id INTEGER PRIMARY KEY, cart_id INTEGER, product_id INTEGER, quantity INTEGER)''')
+
+
+products = [
+    ('HP Pavilion Laptop', 'Electronics', 10.99, 10),
+    ('Samsung Galaxy Smartphone', 'Electronics', 15.99, None),
+    ('Adidas T-shirt', 'Clothing', 8.99, 2.50),
+    ('Levis Jeans', 'Clothing', 12.99, 15)
+]
+cursor.executemany("INSERT INTO products (name, category, price, discount) VALUES (?, ?, ?, ?)", products)
+
+conn.commit()
+##BD
+
 
 app = Flask(__name__)
 app.config['JWT_SECRET_KEY'] = 'your-secret-key'  # Замените 'your-secret-key' на ваш секретный ключ
@@ -16,8 +48,7 @@ USERS = [
         'password': 'test'
     }
 ]
-####222
-##1111
+#yjdsq
 # Генератор нового ID
 def generate_id():
     return max(book['id'] for book in BOOKS) + 1 if BOOKS else 1
@@ -29,30 +60,75 @@ def remove_book(book_id):
 
 
 # Регистрация нового пользователя
+#@app.route('/api/register', methods=['POST'])
+#def register_user():
+ #   data = request.get_json()
+  #  username = data.get('username')
+   # password = data.get('password')
+    #if not username or not password:
+     #   return jsonify({'status': 'error', 'message': 'Username and password are required'}), 400
+    #USERS.append({'username': username, 'password': password})
+    #return jsonify({'status': 'success', 'message': 'User registered successfully'}), 201
+
 @app.route('/api/register', methods=['POST'])
 def register_user():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+
     if not username or not password:
-        return jsonify({'status': 'error', 'message': 'Username and password are required'}), 400
-    USERS.append({'username': username, 'password': password})
-    return jsonify({'status': 'success', 'message': 'User registered successfully'}), 201
+        return jsonify({'message': 'Username and password are required'}), 400
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    cursor.execute("SELECT id FROM users WHERE username=?", (username,))
+    if cursor.fetchone():
+        return jsonify({'message': 'User already exists'}), 400
+    ##ДОБАВИТЬ ПРОВЕРКУ ПО ПОЧТЕ НА УНИКАЛЬНОСТЬ
+
+    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+    conn.commit()
+
+    return jsonify({'message': 'User registered successfully'}), 201
+
+
 
 # Вход пользователя
+#@app.route('/api/login', methods=['POST'])
+#def login_user():
+ #   data = request.get_json()
+  #  username = data.get('username')
+   # password = data.get('password')
+    #if not username or not password:
+     #   return jsonify({'status': 'error', 'message': 'Username and password are required'}), 400
+    #user = next((user for user in USERS if user['username'] == username and user['password'] == password), None)
+    #if user:
+     #   access_token = create_access_token(identity=username)  # Создание токена
+      #  return jsonify({'status': 'success', 'access_token': access_token}), 200
+    #else:
+     #   return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
+
+
 @app.route('/api/login', methods=['POST'])
 def login_user():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+
     if not username or not password:
-        return jsonify({'status': 'error', 'message': 'Username and password are required'}), 400
-    user = next((user for user in USERS if user['username'] == username and user['password'] == password), None)
-    if user:
-        access_token = create_access_token(identity=username)  # Создание токена
-        return jsonify({'status': 'success', 'access_token': access_token}), 200
-    else:
-        return jsonify({'status': 'error', 'message': 'Invalid username or password'}), 401
+        return jsonify({'message': 'Username and password are required'}), 400
+
+    hashed_password = hashlib.sha256(password.encode()).hexdigest()
+    cursor.execute("SELECT id FROM users WHERE username=? AND password=?", (username, hashed_password))
+    user = cursor.fetchone()
+
+    if not user:
+        return jsonify({'message': 'Invalid credentials'}), 401
+
+    access_token = create_access_token(identity=username)
+    return jsonify(access_token=access_token), 200
+
+
+
 
 @app.route('/api/books', methods=['GET'])
 @jwt_required()
