@@ -5,6 +5,7 @@ import Login from '../components/Login.vue'
 import K8sLog from '../components/K8sLog.vue'
 import Account from '../components/Account.vue';
 import Main from '../components/Main.vue';
+import Pediatric from '../components/Pediatric.vue';
 
 
 const router = createRouter({
@@ -47,6 +48,11 @@ const router = createRouter({
       path: '/account',
       name: 'Account',
       component: Account,
+    },
+    {
+      path: '/pediatric',
+      name: 'Pediatric',
+      component: Pediatric,
     },
   ]
 })

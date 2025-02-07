@@ -4,6 +4,8 @@
       <v-btn text to="/main">Главная</v-btn>
       <v-btn text to="/k8sLog">Логи Кубера</v-btn>
       <v-btn text to="/account">Счета</v-btn>
+      <v-btn text to="/books">Книги</v-btn>
+      <v-btn text to="/pediatric">Калукулятор</v-btn>
       <v-spacer></v-spacer>
     </v-app-bar>
   </template>
