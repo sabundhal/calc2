@@ -1,10 +1,21 @@
-import { createApp } from 'vue'
-import App from './App.vue'
-import router from './router'
-import 'bootstrap/dist/css/bootstrap.css'
+import { createApp } from 'vue';
+import App from './App.vue';
+import router from './router';
+import vuetify from './plugins/vuetify';
+import { loadFonts } from './plugins/webfontloader';
+import 'bootstrap/dist/css/bootstrap.css';
 
-const app = createApp(App)
+// Загружаем шрифты
+loadFonts();
 
-app.use(router)
+// Создаем приложение
+const app = createApp(App);
 
-app.mount('#app')
+// Подключаем плагины
+app.use(router);
+app.use(vuetify);
+
+// Монтируем приложение
+app.mount('#app');
+
+

@@ -75,6 +75,7 @@ def register_user():
     data = request.get_json()
     username = data.get('username')
     password = data.get('password')
+    email = data.get('email')
 
     if not username or not password:
         return jsonify({'message': 'Username and password are required'}), 400
@@ -85,7 +86,7 @@ def register_user():
         return jsonify({'message': 'User already exists'}), 400
     ##ДОБАВИТЬ ПРОВЕРКУ ПО ПОЧТЕ НА УНИКАЛЬНОСТЬ
 
-    cursor.execute("INSERT INTO users (username, password) VALUES (?, ?)", (username, hashed_password))
+    cursor.execute("INSERT INTO users (username,email, password) VALUES (?, ?, ?)", (username, email, hashed_password))
     conn.commit()
 
     return jsonify({'message': 'User registered successfully'}), 201
