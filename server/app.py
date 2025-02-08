@@ -29,6 +29,17 @@ def initialize_database():
         cursor.execute('''CREATE TABLE IF NOT EXISTS drugs_categories
                   (category_id SERIAL PRIMARY KEY, category_name TEXT NOT NULL)''')
 
+        cursor.execute('''CREATE TABLE IF NOT EXISTS drugs_categories
+                          (category_id SERIAL PRIMARY KEY, category_name TEXT NOT NULL)''')
+        cursor.execute('''CREATE TABLE IF NOT EXISTS calculation_history
+                          (id INTEGER PRIMARY KEY AUTOINCREMENT,
+                           user_id INTEGER NOT NULL,
+                           drug_id INTEGER NOT NULL,
+                           weight REAL NOT NULL,
+                           dosage_mls REAL NOT NULL,
+                           dosage_mgs REAL NOT NULL,
+                           calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+
         drugs_categories = [
             (1, 'Analgesics'),
             (2, 'Antibiotics'),
@@ -166,8 +177,7 @@ def remove_book(book_id):
 
 @app.route('/api/register', methods=['POST'])
 def register_user():
-    conn = None
-    conn = get_db_connection()
+    conn = sqlite3.connect('myapp.db')
     cursor = conn.cursor()
     data = request.get_json()
     username = data.get('username')
@@ -208,7 +218,7 @@ def register_user():
 
 @app.route('/api/login', methods=['POST'])
 def login_user():
-    conn = get_db_connection()
+    conn = sqlite3.connect('myapp.db')
     cursor = conn.cursor()
     data = request.get_json()
     username = data.get('username')
@@ -223,12 +233,15 @@ def login_user():
 
     if not user:
         return jsonify({'message': 'Invalid credentials'}), 401
-
+        # Получаем user_id
+    user_id = user[0]
     access_token = create_access_token(identity=username)
-    return jsonify(access_token=access_token), 200
+    # Возвращаем токен и user_id
+    return jsonify(access_token=access_token, user_id=user_id), 200
 
 ###Calculator
 @app.route('/api/drugs', methods=['GET'])
+#@jwt_required()  # Защищаем маршрут JWT-токеном
 def get_drugs():
     cursor = get_db_connection()
     try:
@@ -262,12 +275,63 @@ def get_drugs():
     finally:
         cursor.connection.close()  # Закрываем соединение через курсор
 
+##Расчет дозировки и сохранение в БД@app.route('/calculate', methods=['POST'])
+@app.route('/api/calculate', methods=['POST'])
+#@jwt_required()  # Защищаем маршрут JWT-токеном
+def calculate_dosage():
+    data = request.json
+    user_id = data.get('user_id')
+    drug_id = data.get('drug_id')
+    weight = data.get('weight')
+    weight = float(weight)
 
+    # Проверяем наличие обязательных параметров
+    if user_id is None or drug_id is None or weight is None:
+        return jsonify({'error': 'user_id, drug_id, and weight are required'}), 400
 
+    # Проверяем корректность веса
+    if weight <= 0:
+        return jsonify({'error': 'Weight must be greater than 0'}), 400
 
+    # Получаем данные о препарате из базы данных
+    try:
+        conn = sqlite3.connect('myapp.db')
+        cursor = conn.cursor()
+
+        # Запрос данных о препарате
+        cursor.execute('''SELECT name, mls_var, mgs_var
+                          FROM drugs
+                          WHERE id = ?''', (drug_id,))
+        drug = cursor.fetchone()
+
+        if not drug:
+            conn.close()
+            return jsonify({'error': 'Drug not found'}), 404
+
+        # Извлекаем данные из результата запроса
+        name, mls_var, mgs_var = drug
+
+        # Выполняем расчеты
+        mls_total = weight * mls_var
+        mgs_total = weight * mgs_var
+
+        # Сохраняем расчет в историю
+        cursor.execute('''INSERT INTO calculation_history
+                          (user_id, drug_id, weight, dosage_mls, dosage_mgs)
+                          VALUES (?, ?, ?, ?, ?)''',
+                       (user_id, drug_id, weight, mls_total, mgs_total))
+        conn.commit()
+        conn.close()
+
+    except sqlite3.Error as e:
+        return jsonify({'error': f'Database error: {str(e)}'}), 500
+
+    return jsonify({'mlsTotal': mls_total, 'mgsTotal': mgs_total})
+
+#############
 
 @app.route('/api/books', methods=['GET'])
-@jwt_required()
+#@jwt_required()
 def user_books():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -277,7 +341,7 @@ def user_books():
 
 # Добавление новой книги
 @app.route('/api/books', methods=['POST'])
-@jwt_required()
+#@jwt_required()
 def add_book():
     conn = get_db_connection()
     cursor = conn.cursor()
@@ -295,7 +359,7 @@ def add_book():
 
 # Получение, обновление или удаление конкретной книги по ее ID
 @app.route('/api/books/<int:book_id>', methods=['GET', 'PUT', 'DELETE'])
-@jwt_required()
+#@jwt_required()
 def single_book(book_id):
     conn = get_db_connection()
     cursor = conn.cursor()

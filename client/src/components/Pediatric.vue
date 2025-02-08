@@ -23,6 +23,7 @@
         min="1"
         max="100"
         type="number"
+        ref="weightInput"
         @click="clearResults"
         @select="clearResults"
       />
@@ -30,7 +31,7 @@
 
      <!-- Выбор препарата -->
     <div class="drug__section">
-      <select id="drug" v-model="selectedDrug" @change="validate">
+      <select id="drug" ref="drugIdInput" v-model="selectedDrug" @change="validate">
         <option value="None">Select Drug</option>
         <optgroup v-for="(drugs, category) in drugsByCategories" :key="category" :label="category">
           <option v-for="drug in drugs" :key="drug.id" :value="drug.id">
@@ -116,6 +117,34 @@ export default {
     };
   },
   methods: {
+    calculateDosage() {
+    const drugId = this.$refs.drugIdInput.value;
+    const weight = this.$refs.weightInput.value;
+
+    if (!drugId || !weight) {
+      this.error = 'Пожалуйста, заполните все поля.';
+      return;
+    }
+
+    fetch('/api/calculate', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        user_id: `${localStorage.getItem('user_id')}`,
+        drug_id: drugId,
+        weight: weight
+      })
+    })
+    .then(response => response.json())
+    .then(data => {
+      this.result = data;
+    })
+    .catch(error => {
+      this.error = 'Ошибка при выполнении запроса: ' + error.message;
+    });
+  },
     validate() {
      console.log('Validate method called'); // Лог для проверки
       this.clearErrors();
@@ -130,10 +159,11 @@ export default {
       } else if (this.selectedDrug === "None") {
         this.showError("Please select a drug", "drug");
       } else {
-        this.calculateMlsTotal();
-        this.calculateMgsTotal();
+         // Если валидация прошла успешно, вызываем расчет
+      this.calculateDosage();
       }
     },
+
     showError(message, field) {
       this.errorMessage = message;
 
@@ -182,9 +212,10 @@ export default {
     // Загружаем данные при создании компонента
     this.loadDrugs();
   },
-};
-</script>
 
+};
+
+</script>
 <style scoped>
 /* Добавьте ваши стили здесь */
 @import '../assets/calculator-style.css';

@@ -65,7 +65,8 @@ export default {
       .then((response) => {
         const token = response.data.access_token; 
         localStorage.setItem('access_token', token); 
-        localStorage.setItem('user_name', this.loginForm.username); 
+        localStorage.setItem('user_name', this.loginForm.username);
+        localStorage.setItem('user_id', user_id);
         this.message = 'Вход выполнен успешно!';
         this.showMessage = true;
         this.resetForm();
