@@ -12,30 +12,33 @@
         <div class="error__section" id="warning-message"></div>
         <div class="error__section" id="error-message"></div>
 
-        <div class="weight__section">
-          <div class="weight__section-item weight__section-label">Weight (kg)</div>
-          <input
-            class="weight__section-item weight__section-input"
-            id="theweight"
-            v-model="weight"
-            min="1"
-            max="100"
-            type="number"
-            @click="clearResults"
-            @select="clearResults"
-          />
-        </div>
 
-     <div class="drug__section">
-  <select id="drug" v-model="selectedDrug" @change="validate">
-    <option value="None">Select Drug</option>
-    <optgroup v-for="(drugs, category) in drugsByCategories" :key="category" :label="category">
-      <option v-for="drug in drugs" :key="drug.id" :value="drug.id">
-        {{ drug.name }} <!-- Пояснение удалено -->
-      </option>
-    </optgroup>
-  </select>
-</div>
+    <!-- Вес -->
+    <div class="weight__section">
+      <div class="weight__section-item weight__section-label">Weight (kg)</div>
+      <input
+        class="weight__section-item weight__section-input"
+        id="theweight"
+        v-model="weight"
+        min="1"
+        max="100"
+        type="number"
+        @click="clearResults"
+        @select="clearResults"
+      />
+    </div>
+
+     <!-- Выбор препарата -->
+    <div class="drug__section">
+      <select id="drug" v-model="selectedDrug" @change="validate">
+        <option value="None">Select Drug</option>
+        <optgroup v-for="(drugs, category) in drugsByCategories" :key="category" :label="category">
+          <option v-for="drug in drugs" :key="drug.id" :value="drug.id">
+            {{ drug.name }}
+          </option>
+        </optgroup>
+      </select>
+    </div>
 
         <div class="calculate__section">
           <input type="button" id="calcbutton" value="Calculate" @click="validate" />
@@ -59,6 +62,8 @@
         </div>
       </form>
     </div>
+        <!-- Сообщения об ошибках -->
+    <div v-if="errorMessage" class="error-message">{{ errorMessage }}</div>
 
     <div class="message__section-dosing" id="dosing-section" style="display: none">
       <div class="message__section-dosing-item message__section-dosing-label" id="instructions"></div>
@@ -89,6 +94,7 @@
       </div>
     </div>
   </div>
+
 </template>
 
 <script>
@@ -98,14 +104,68 @@ export default {
   name: 'PediatricCalculator',
   data() {
     return {
-      selectedDrug: 'None',
-      drugsByCategories: {}  // Для хранения данных, сгруппированных по категориям
+      weight: "",
+      selectedDrug: "None",
+      drugsByCategories: {}, // Данные, сгруппированные по категориям
+      mlsTotal: null,
+      mgsTotal: null,
+      errorMessage: "",
+      warningMessage: "",
+      weightBorder: "1px solid #cacaca",
+      drugBorder: "1px solid #cacaca",
     };
   },
   methods: {
     validate() {
-      console.log('Selected Drug:', this.selectedDrug);
-      // Ваша логика расчёта дозы
+     console.log('Validate method called'); // Лог для проверки
+      this.clearErrors();
+
+      if (this.weight === "") {
+        this.showError("Please input a weight", "weight");
+      } else if (this.weight < 0) {
+        this.showError("Cannot be negative weight.", "weight");
+      } else if (this.weight > 100) {
+        console.log('Validate 100'); // Лог для проверки
+        this.showError("Please enter a weight below 100kg.", "weight");
+      } else if (this.selectedDrug === "None") {
+        this.showError("Please select a drug", "drug");
+      } else {
+        this.calculateMlsTotal();
+        this.calculateMgsTotal();
+      }
+    },
+    showError(message, field) {
+      this.errorMessage = message;
+
+      if (field === "weight") {
+        this.weightBorder = "1px solid red";
+      } else if (field === "drug") {
+        this.drugBorder = "1px solid red";
+      }
+    },
+    clearErrors() {
+      this.errorMessage = "";
+      this.weightBorder = "1px solid #cacaca";
+      this.drugBorder = "1px solid #cacaca";
+    },
+    clearResults() {
+      this.mlsTotal = null;
+      this.mgsTotal = null;
+    },
+    calculateMlsTotal() {
+      // Пример расчета (замените на вашу логику)
+      this.mlsTotal = this.weight * 2; // Пример: 2 мл на каждый кг
+    },
+    calculateMgsTotal() {
+      // Пример расчета (замените на вашу логику)
+      this.mgsTotal = this.weight * 5; // Пример: 5 мг на каждый кг
+    },
+    copyToClipboard(elementId) {
+      const element = document.getElementById(elementId);
+      if (element) {
+        const text = element.innerText;
+        navigator.clipboard.writeText(text);
+      }
     },
     loadDrugs() {
       // Загружаем данные из API
@@ -116,14 +176,13 @@ export default {
         .catch(error => {
           console.error('Error fetching drugs:', error);
         });
-    }
+    },
   },
   created() {
     // Загружаем данные при создании компонента
     this.loadDrugs();
-  }
+  },
 };
-
 </script>
 
 <style scoped>
