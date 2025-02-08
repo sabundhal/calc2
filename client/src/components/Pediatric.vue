@@ -26,40 +26,16 @@
           />
         </div>
 
-        <div class="drug__section">
-          <select id="drug" v-model="selectedDrug" @change="validate">
-            <option value="None">Select Drug</option>
-            <optgroup label="Analgesics">
-              <option value="Paracetamol120">Paracetamol 120mg/5mL (15mg/kg)</option>
-              <option value="Paracetamol250">Paracetamol 250mg/5mL (15mg/kg)</option>
-              <option value="Ibuprofen100">Ibuprofen 100mg/5mL (5-10mg/kg)</option>
-            </optgroup>
-            <optgroup label="Antibiotics">
-              <option value="Amoxicillin125">Amoxicillin 125mg/5mL (15-30mg/kg)</option>
-              <option value="Amoxicillin250">Amoxicillin 250mg/5mL (15-30mg/kg)</option>
-              <option value="Cefaclor125">Cefaclor 125mg/5mL (10mg/kg)</option>
-              <option value="Cefalexin125multi">Cefalexin 125mg/5mL (12.5-25mg/kg)</option>
-              <option value="Cefalexin250multi">Cefalexin 250mg/5mL (12.5-25 mg/kg)</option>
-              <option value="Coamoxiclav125-31.25">Coamoxiclav 125-31.25mg/5mL (15mg/kg)</option>
-              <option value="Coamoxiclav250-62.5">Coamoxiclav 250-62.5mg/5mL (15mg/kg)</option>
-              <option value="Cotrimoxazole480">Cotrimoxazole 240mg/5mL (24mg/kg)</option>
-              <option value="Erythromycin200">Erythromycin 200mg/5mL (10-12.5mg/kg)</option>
-              <option value="Erythromycin400">Erythromycin 400mg/5mL (10-12.5mg/kg)</option>
-              <option value="Flucloxacillin125">Flucloxacillin 125mg/5mL (12.5mg/kg)</option>
-              <option value="Flucloxacillin250">Flucloxacillin 250mg/5mL (12.5mg/kg)</option>
-              <option value="Penicillin125">Phenoxymethylpenicillin 125mg/5mL (6.25-12.5mg/kg)</option>
-              <option value="Penicillin250">Phenoxymethylpenicillin 250mg/5mL (6.25-12.5mg/kg)</option>
-              <option value="Roxithromycin">Roxithromycin 50mg tablets (weight based)</option>
-            </optgroup>
-            <optgroup label="Other">
-              <option value="Lactulose">Lactulose (0.5mL/kg)</option>
-              <option value="Loratadine">Loratadine 1mg/1mL (age/weight based)</option>
-              <option value="Macrogol">Macrogol 13.12g/sachet (0.5-1.5g/kg)</option>
-              <option value="Prednisolone">Prednisolone 5mg/1mL (1-2mg/kg)</option>
-              <option value="Ferrous_sulphate">Ferrous sulphate 30mg/1mL (0.5-1mg/kg)</option>
-            </optgroup>
-          </select>
-        </div>
+     <div class="drug__section">
+  <select id="drug" v-model="selectedDrug" @change="validate">
+    <option value="None">Select Drug</option>
+    <optgroup v-for="(drugs, category) in drugsByCategories" :key="category" :label="category">
+      <option v-for="drug in drugs" :key="drug.id" :value="drug.id">
+        {{ drug.name }} <!-- Пояснение удалено -->
+      </option>
+    </optgroup>
+  </select>
+</div>
 
         <div class="calculate__section">
           <input type="button" id="calcbutton" value="Calculate" @click="validate" />
@@ -116,34 +92,38 @@
 </template>
 
 <script>
+import axios from 'axios';
+
 export default {
   name: 'PediatricCalculator',
   data() {
     return {
-      weight: null,
       selectedDrug: 'None',
+      drugsByCategories: {}  // Для хранения данных, сгруппированных по категориям
     };
   },
   methods: {
     validate() {
-      // Логика для валидации и расчета дозы
-      console.log('Weight:', this.weight);
       console.log('Selected Drug:', this.selectedDrug);
-      // Добавьте вашу логику расчета здесь
+      // Ваша логика расчёта дозы
     },
-    clearResults() {
-      // Очистка результатов
-      document.getElementById('Result').innerText = '';
-      document.getElementById('ResultMgs').innerText = '';
-    },
-    copyToClipboard(elementId) {
-      const text = document.getElementById(elementId).innerText;
-      navigator.clipboard.writeText(text).then(() => {
-        console.log('Text copied to clipboard');
-      });
-    },
+    loadDrugs() {
+      // Загружаем данные из API
+      axios.get('/api/drugs')
+        .then(response => {
+          this.drugsByCategories = response.data;
+        })
+        .catch(error => {
+          console.error('Error fetching drugs:', error);
+        });
+    }
   },
+  created() {
+    // Загружаем данные при создании компонента
+    this.loadDrugs();
+  }
 };
+
 </script>
 
 <style scoped>
