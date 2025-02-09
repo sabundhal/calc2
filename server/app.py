@@ -31,23 +31,44 @@ def initialize_database():
 
         cursor.execute('''CREATE TABLE IF NOT EXISTS drugs_categories
                           (category_id SERIAL PRIMARY KEY, category_name TEXT NOT NULL)''')
-        cursor.execute('''CREATE TABLE IF NOT EXISTS calculation_history
-                          (id INTEGER PRIMARY KEY AUTOINCREMENT,
-                           user_id INTEGER NOT NULL,
-                           drug_id INTEGER NOT NULL,
-                           weight REAL NOT NULL,
-                           dosage_mls REAL NOT NULL,
-                           dosage_mgs REAL NOT NULL,
-                           calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP)''')
+        cursor.execute('''
+        CREATE TABLE IF NOT EXISTS calculation_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            calculation_id INTEGER,  
+            user_id INTEGER NOT NULL,
+            drug_id INTEGER NOT NULL,
+            drug_name TEXT,
+            username TEXT,
+            weight REAL NOT NULL,
+            dosage_mls REAL,
+            dosage_mgs REAL,
+            totalMgs REAL,
+            totalhigh REAL,
+            totalhighsachets REAL,
+            maximumMgsPerDay REAL,
+            highMgs REAL,
+            loading_dose INTEGER,
+            strep_drug INTEGER,
+            messageMgs TEXT,
+            messageOther TEXT,
+            calculation_type TEXT,
+            calculation_status TEXT,
+            calculation_version TEXT,
+            patient_id INTEGER,
+            patient_name TEXT,
+            error_message TEXT,
+            calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        )
+        ''')
 
-        drugs_categories = [
-            (1, 'Analgesics'),
-            (2, 'Antibiotics'),
-            (3, 'Anti-inflammatory'),
-            (4, 'Antipyretic'),
-            (5, 'Antiviral')
-        ]
-        cursor.executemany("INSERT INTO drugs_categories (category_id, category_name) VALUES (?, ?)", drugs_categories)
+        # drugs_categories = [
+        #     (1, 'Analgesics'),
+        #     (2, 'Antibiotics'),
+        #     (3, 'Anti-inflammatory'),
+        #     (4, 'Antipyretic'),
+        #     (5, 'Antiviral')
+        # ]
+        # cursor.executemany("INSERT INTO drugs_categories (category_id, category_name) VALUES (?, ?)", drugs_categories)
 
 # Новая таблица для препаратов
         cursor.execute('''CREATE TABLE IF NOT EXISTS drugs
@@ -119,14 +140,14 @@ def initialize_database():
  ]
 # Выполняем вставку
 
-        cursor.executemany('''INSERT INTO drugs
-    (name, category_id, tablet_only, mls_var, mgs_var, number_of_times_a_day,
-     mls_max, mgs_max, loading_dose, mls_var_loading, mgs_var_loading,
-     mls_max_loading, mgs_max_loading, instructions, nzf_link,
-     high_range, high_modifier, mls_max_high, mgs_max_high,
-     strep_drug, strep_frequency, mls_var_strep, mgs_var_strep,
-     mls_strep_max, mgs_strep_max)
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', drugs_data)
+    #     cursor.executemany('''INSERT INTO drugs
+    # (name, category_id, tablet_only, mls_var, mgs_var, number_of_times_a_day,
+    #  mls_max, mgs_max, loading_dose, mls_var_loading, mgs_var_loading,
+    #  mls_max_loading, mgs_max_loading, instructions, nzf_link,
+    #  high_range, high_modifier, mls_max_high, mgs_max_high,
+    #  strep_drug, strep_frequency, mls_var_strep, mgs_var_strep,
+    #  mls_strep_max, mgs_strep_max)
+    # VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', drugs_data)
 
         products = [
             ('HP Pavilion Laptop', 'Electronics', 10.99, 10),
@@ -299,6 +320,7 @@ def calculate_dosage():
         cursor = conn.cursor()
 
         # Запрос данных о препарате
+        #можно ли тут написать. select *?
         cursor.execute('''SELECT name, mls_var, mgs_var
                           FROM drugs
                           WHERE id = ?''', (drug_id,))
@@ -316,17 +338,40 @@ def calculate_dosage():
         mgs_total = weight * mgs_var
 
         # Сохраняем расчет в историю
-        cursor.execute('''INSERT INTO calculation_history
-                          (user_id, drug_id, weight, dosage_mls, dosage_mgs)
-                          VALUES (?, ?, ?, ?, ?)''',
-                       (user_id, drug_id, weight, mls_total, mgs_total))
+        # Установка значений для всех 23 полей
+        cursor.execute('''
+            INSERT INTO calculation_history (
+                user_id, calculation_id, drug_id, drug_name, username, weight, dosage_mls, dosage_mgs,
+                totalMgs, totalhigh, totalhighsachets, maximumMgsPerDay, highMgs,
+                loading_dose, strep_drug, messageMgs, messageOther, calculation_type,
+                calculation_status, calculation_version, patient_id, patient_name, error_message
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                       (
+                           user_id, None, drug_id, 'Drug Name', 'Username', weight, mls_total, mgs_total,
+                           0, 0, 0, 0, 0, 0, 0, 'Message', None, 'Type',
+                           'Status', 'Version', 0, 'Patient Name', None
+                       ))
+        # Получаем автоматически сгенерированный id
+        calculation_id = cursor.lastrowid
+        # Обновляем запись, чтобы установить calculation_id равным id
+        cursor.execute('''
+            UPDATE calculation_history
+            SET calculation_id = ?
+            WHERE id = ?''',
+                       (calculation_id, calculation_id))
         conn.commit()
-        conn.close()
+
 
     except sqlite3.Error as e:
         return jsonify({'error': f'Database error: {str(e)}'}), 500
 
-    return jsonify({'mlsTotal': mls_total, 'mgsTotal': mgs_total})
+        # Возвращаем ответ с calculation_id
+    return jsonify({
+            'mlsTotal': mls_total,
+            'mgsTotal': mgs_total,
+            'calculation_id': calculation_id
+        })
+    conn.close()
 
 #############
 

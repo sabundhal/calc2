@@ -63,7 +63,8 @@ export default {
     const path = `/api/login`;
     axios.post(path, payload)
       .then((response) => {
-        const token = response.data.access_token; 
+        const token = response.data.access_token;
+        const user_id = response.data.user_id;
         localStorage.setItem('access_token', token); 
         localStorage.setItem('user_name', this.loginForm.username);
         localStorage.setItem('user_id', user_id);

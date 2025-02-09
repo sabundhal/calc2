@@ -42,25 +42,45 @@
     </div>
 
         <div class="calculate__section">
-          <input type="button" id="calcbutton" value="Calculate" @click="validate" />
+          <input type="button" id="calcbutton" value="Calculate" @click=calculateDosage() />
         </div>
 
-        <div class="result__section">
-          <div class="result__section-mls">
-            <div class="result__section-mls-item result__section-mls-label">Dose <br /> in millilitres</div>
-            <div class="result__section-mls-item result__section-mls-result" id="Result" style="display: block"></div>
-            <button class="result__section-mls-item clipboard btn tippy copy" data-tippy-content="Copied to Clipboard" title="Copy to Clipboard" @click="copyToClipboard('Result')">
-              <i class="far fa-clipboard"></i>
-            </button>
-          </div>
-          <div class="result__section-mgs">
-            <div class="result__section-mgs-item result__section-mgs-label">Dose <br /> in milligrams</div>
-            <div class="result__section-mgs-item result__section-mgs-result" id="ResultMgs" style="display: block"></div>
-            <button class="result__section-mgs-item clipboard btn tippy copy" data-tippy-content="Copied to Clipboard" title="Copy to Clipboard" @click="copyToClipboard('ResultMgs')">
-              <i class="far fa-clipboard"></i>
-            </button>
-          </div>
+       <div class="result__section">
+        <div class="result__section-mls">
+            <div class="result__section-mls-item result__section-mls-label">
+                Dose <br />in millilitres
+            </div>
+            <div class="result__section-mls-item result__section-mls-result" id="Result" style="display: block">
+                {{ mlsTotal }} <!-- Отображаем значение мл -->
+            </div>
+            <button class="result__section-mls-item clipboard btn tippy copy"
+                    data-tippy-content="Copied to Clipboard"
+                    title="Copy to Clipboard"
+                    @click="copyToClipboard('Result')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
+    <path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 272C191.1 372.4 220.7 400 256 400h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 224.1c0-8.836 7.164-16 16-16H160V256H64.02L63.99 416h192V448z"/>
+  </svg>
+  Копировать
+</button>
         </div>
+        <div class="result__section-mgs">
+            <div class="result__section-mgs-item result__section-mgs-label">
+                Dose <br />in milligrams
+            </div>
+            <div class="result__section-mgs-item result__section-mgs-result" id="ResultMgs" style="display: block">
+                {{ mgsTotal }} <!-- Отображаем значение мг -->
+            </div>
+            <button class="result__section-mgs-item clipboard btn tippy copy"
+                    data-tippy-content="Copied to Clipboard"
+                    title="Copy to Clipboard"
+                    @click="copyToClipboard('ResultMgs')">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="16" height="16">
+    <path d="M502.6 70.63l-61.25-61.25C435.4 3.371 427.2 0 418.7 0H255.1c-35.35 0-64 28.66-64 64l.0195 272C191.1 372.4 220.7 400 256 400h192c35.2 0 64-28.8 64-64V93.25C512 84.77 508.6 76.63 502.6 70.63zM464 320c0 8.836-7.164 16-16 16H255.1c-8.838 0-16-7.164-16-16L239.1 64.13c0-8.836 7.164-16 16-16h128L384 96c0 17.67 14.33 32 32 32h47.1V320zM272 448c0 8.836-7.164 16-16 16H63.1c-8.838 0-16-7.164-16-16L47.98 224.1c0-8.836 7.164-16 16-16H160V256H64.02L63.99 416h192V448z"/>
+  </svg>
+  Копировать
+</button>
+        </div>
+    </div>
       </form>
     </div>
         <!-- Сообщения об ошибках -->
@@ -89,11 +109,7 @@
       </div>
     </div>
 
-    <div class="calculator__author">
-      <div class="calculator__author-item calculator__author-information">
-        Calculator written by Dr Jeremy Steinberg, GP. <a href="https://www.jackofallorgans.com/contact" target="_blank">Contact</a> for suggestions
-      </div>
-    </div>
+
   </div>
 
 </template>
@@ -108,8 +124,8 @@ export default {
       weight: "",
       selectedDrug: "None",
       drugsByCategories: {}, // Данные, сгруппированные по категориям
-      mlsTotal: null,
-      mgsTotal: null,
+      mlsTotal: '', // Реактивное свойство для мл
+      mgsTotal: '', // Реактивное свойство для мг
       errorMessage: "",
       warningMessage: "",
       weightBorder: "1px solid #cacaca",
@@ -118,33 +134,61 @@ export default {
   },
   methods: {
     calculateDosage() {
+     const user_id = localStorage.getItem('user_id');
+
+    // Проверяем, что user_id существует
+    if (!user_id) {
+        this.error = 'Пользователь не авторизован. Пожалуйста, войдите в систему.';
+        return; // Прерываем выполнение, если user_id отсутствует
+    }
+
+    // Получаем значения из элементов формы
     const drugId = this.$refs.drugIdInput.value;
     const weight = this.$refs.weightInput.value;
 
+    // Проверяем, что все поля заполнены
     if (!drugId || !weight) {
-      this.error = 'Пожалуйста, заполните все поля.';
-      return;
+        this.error = 'Пожалуйста, заполните все поля.';
+        return; // Прерываем выполнение, если данные не заполнены
     }
 
+    // Создаем объект данных для отправки
+    const requestData = {
+        user_id: `${localStorage.getItem('user_id')}`, // Получаем user_id из localStorage
+        drug_id: drugId, // ID препарата
+        weight: weight // Вес пациента
+    };
+
+    // Отправляем запрос на сервер
     fetch('/api/calculate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        user_id: `${localStorage.getItem('user_id')}`,
-        drug_id: drugId,
-        weight: weight
-      })
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(requestData) // Преобразуем данные в JSON
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Ошибка сервера: ' + response.status);
+        }
+        return response.json(); // Парсим ответ от сервера
+    })
     .then(data => {
-      this.result = data;
+        this.result = data; // Устанавливаем результат
+        this.mlsTotal = data.mlsTotal; // Обновляем молярные данные
+        this.mgsTotal = data.mgsTotal;
     })
     .catch(error => {
-      this.error = 'Ошибка при выполнении запроса: ' + error.message;
+        this.error = 'Ошибка при выполнении запроса: ' + error.message;
     });
-  },
+        },
+        // Метод для копирования в буфер обмена
+        copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            navigator.clipboard.writeText(element.textContent).then(() => {
+                alert('Скопировано в буфер обмена!');
+            });
+        },
     validate() {
      console.log('Validate method called'); // Лог для проверки
       this.clearErrors();
@@ -158,9 +202,6 @@ export default {
         this.showError("Please enter a weight below 100kg.", "weight");
       } else if (this.selectedDrug === "None") {
         this.showError("Please select a drug", "drug");
-      } else {
-         // Если валидация прошла успешно, вызываем расчет
-      this.calculateDosage();
       }
     },
 

@@ -112,3 +112,30 @@ mlsmaxloading: Максимальный объем ударной дозы.
 mgsmaxloading: Максимальная доза ударной дозы.
 instructions: Инструкции по применению.
 nzflink: Ссылка на NZ Formulary.
+
+CREATE TABLE IF NOT EXISTS calculation_history (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,           -- ID пользователя, выполнившего расчет
+    drug_id INTEGER NOT NULL,           -- ID препарата
+    drug_name TEXT,                     -- Название препарата
+    username TEXT,                      -- Имя пользователя
+    weight REAL NOT NULL,               -- Вес пациента
+    dosage_mls REAL,                    -- Доза в мл
+    dosage_mgs REAL,                    -- Доза в мг
+    totalMgs REAL,                      -- Общее количество мг
+    totalhigh REAL,                     -- Высокая доза с модификатором
+    totalhighsachets REAL,              -- Расчет сашетов
+    maximumMgsPerDay REAL,              -- Максимальная доза в мг в день
+    highMgs REAL,                       -- Максимальная доза для высокого диапазона
+    loading_dose INTEGER,               -- Загрузочная доза
+    strep_drug INTEGER,                 -- Флаг стрептококкового препарата
+    messageMgs TEXT,                    -- Сообщение о дозе в мг
+    messageOther TEXT,                  -- Другое сообщение
+    calculation_type TEXT,              -- Тип расчета (например, "стандартный", "загрузочный")
+    calculation_status TEXT,            -- Статус расчета (например, "успешно", "ошибка")
+    calculation_version TEXT,           -- Версия алгоритма расчета
+    patient_id INTEGER,                 -- ID пациента (если расчеты связаны с пациентами)
+    patient_name TEXT,                  -- Имя пациента (удобно для анализа без JOIN)
+    error_message TEXT,                 -- Лог ошибки (если расчет завершился ошибкой)
+    calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Время выполнения расчета
+);
