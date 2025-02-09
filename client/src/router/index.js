@@ -6,6 +6,7 @@ import K8sLog from '../components/K8sLog.vue';
 import Account from '../components/Account.vue';
 import Main from '../components/Main.vue';
 import Pediatric from '../components/Pediatric.vue';
+import CalculationHistory from '../components/CalculationHistory.vue';
 
 const routes = [
   {
@@ -41,6 +42,11 @@ const routes = [
     path: '/account',
     name: 'Account',
     component: Account,
+  },
+  {
+    path: '/calculationhistory',
+    name: 'CalculationHistory',
+    component: CalculationHistory,
   },
   {
     path: '/pediatric',

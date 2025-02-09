@@ -6,6 +6,7 @@
       <v-btn text to="/account">Счета</v-btn>
       <v-btn text to="/books">Книги</v-btn>
       <v-btn text to="/pediatric">Калукулятор</v-btn>
+      <v-btn text to="/calculationhistory">История Расчетов</v-btn>
       <v-spacer></v-spacer>
     </v-app-bar>
   </template>

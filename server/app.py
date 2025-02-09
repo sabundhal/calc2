@@ -321,7 +321,7 @@ def calculate_dosage():
 
         # Запрос данных о препарате
         #можно ли тут написать. select *?
-        cursor.execute('''SELECT name, mls_var, mgs_var
+        cursor.execute('''SELECT name, category_id, mls_var, mgs_var
                           FROM drugs
                           WHERE id = ?''', (drug_id,))
         drug = cursor.fetchone()
@@ -331,7 +331,7 @@ def calculate_dosage():
             return jsonify({'error': 'Drug not found'}), 404
 
         # Извлекаем данные из результата запроса
-        name, mls_var, mgs_var = drug
+        name, category_id, mls_var, mgs_var = drug
 
         # Выполняем расчеты
         mls_total = weight * mls_var
@@ -347,8 +347,8 @@ def calculate_dosage():
                 calculation_status, calculation_version, patient_id, patient_name, error_message
             ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
                        (
-                           user_id, None, drug_id, 'Drug Name', 'Username', weight, mls_total, mgs_total,
-                           0, 0, 0, 0, 0, 0, 0, 'Message', None, 'Type',
+                           user_id, None, drug_id, name, 'Username', weight, mls_total, mgs_total,
+                           0, 0, 0, 0, 0, 0, 0, 'Message', None, category_id,
                            'Status', 'Version', 0, 'Patient Name', None
                        ))
         # Получаем автоматически сгенерированный id
@@ -374,6 +374,63 @@ def calculate_dosage():
     conn.close()
 
 #############
+@app.route('/api/calculation-history/', methods=['GET'])
+def get_calculation_history():
+    user_id = request.args.get('user_id')  # Обязательный параметр
+    category_name = request.args.get('category_name')  # Необязательный
+    date_from = request.args.get('date_from')  # Необязательный
+    date_to = request.args.get('date_to')  # Необязательный
+
+    # Проверяем наличие обязательного параметра
+    if not user_id:
+        return jsonify({'error': 'user_id is required'}), 400
+
+    try:
+        conn = sqlite3.connect('myapp.db')
+        cursor = conn.cursor()
+
+        # Формируем SQL-запрос с JOIN
+        query = '''SELECT ch.*
+                   FROM calculation_history ch
+                   JOIN drugs_categories dc ON ch.calculation_type = dc.category_id
+                   WHERE ch.user_id = ?'''
+        params = [user_id]
+
+        # Добавляем фильтры, если они переданы
+        if category_name:
+            query += ' AND dc.category_name = ?'
+            params.append(category_name)
+
+        if date_from and date_to:
+            query += ' AND ch.created_at BETWEEN ? AND ?'
+            params.extend([date_from, date_to])
+
+        # Выполняем запрос
+        cursor.execute(query, params)
+        history = cursor.fetchall()
+
+        # Преобразуем данные в формат JSON
+        result = []
+        for row in history:
+            result.append({
+                'id': row[0],  # id
+        'user_id': row[2],  # user_id
+        'drug_name': row[4],  # drug_name
+        'calculation_type': row[15],
+        'weight': row[6],       # calculation_type
+        'mls': row[7],  # dosage_mls
+        'mgs': row[8],  # dosage_mgs
+        'created_at': row[24]  # calculation_time
+    })
+        return jsonify(result), 200
+
+    except Exception as e:
+        return jsonify({'error': str(e)}), 500
+
+    finally:
+        conn.close()
+ ########
+
 
 @app.route('/api/books', methods=['GET'])
 #@jwt_required()
