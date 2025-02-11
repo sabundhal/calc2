@@ -57,9 +57,8 @@ def initialize_database():
             patient_id INTEGER,
             patient_name TEXT,
             error_message TEXT,
-            calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-        ''')
+            calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            age REAL)''')
 
         # drugs_categories = [
         #     (1, 'Analgesics'),
@@ -97,48 +96,151 @@ def initialize_database():
                  mls_var_strep REAL,
                  mgs_var_strep REAL,
                  mls_strep_max REAL,
-                 mgs_strep_max REAL)''')
+                 mgs_strep_max REAL,
+                 weight_cutoff_1 REAL,
+                 weight_cutoff_2 REAL,
+                 range1_dose REAL,
+                 range2_dose REAL,
+                 form TEXT,
+                 age_range REAL
+                 )''')
 
 # Заполнение данных препаратов (пример для нескольких записей)
         drugs_data = [
-            ('Paracetamol120',1, False, 0.625, 15, 'every four hours, up to a maximum of four doses in 24 hours', 42, 1000, True,
-     1.25, 30, 62.5, 1500,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter <br> <span class=\'age-group\'> Note</span> A loading dose of 30 mg/kg (maximum 1.5 g) may be given provided there has been no paracetamol given within the preceding 12 hours</div></div>',
-     'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None),
-            ('Paracetamol250',1, False, 0.3, 15, 'every four hours, up to a maximum of four doses in 24 hours', 20, 1000, True,
-     0.6, 30, 30, 1500,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter <br> <span class=\'age-group\'> Note</span> A loading dose of 30 mg/kg (maximum 1.5 g) may be given provided there has been no paracetamol given within the preceding 12 hours</div></div>',
-     'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None),
-    ('Paracetamol120nonloading', 1,  False, 0.625, 15, 'every four hours, up to a maximum of four doses in 24 hours', 42,
-     1000, False, 1.25, 30, 62.5, 1500,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter</div></div>',
-     'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None),
-    (
-    'Paracetamol250nonloading', 1, False, 0.3, 15, 'every four hours, up to a maximum of four doses in 24 hours', 20, 1000,
-    False, 0.6, 30, 30, 1500,
-    '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> < br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter</div></div>',
-    'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None),
-    ('Ibuprofen100',1, False, 0.25, 5, 'three to four times a day', 10, 200, False, None, None, None, None,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 - 3 months</span> 5 mg/kg 3-4 times daily <br> <span class=\'age-group\'> 3 months - 18 years</span> 5-10 mg/kg 3 or 4 times daily up to 30 mg/kg daily (maximum 2.4 g daily)</div></div>',
-     'https://nzfchildren.org.nz/nzf_5524', True, 2, 20, 400, False, '', None, None, None, None),
-    ('Ibuprofen100norange',1, False, 0.3, 6, 'three times a day', 20, 400, False, None, None, None, None,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>3 months - 18 years</span> 6 mg/kg per dose (maximum 400mg) every 8 hours as needed for pain or fever. Do not take more than 3 doses in 24 hours.</div></div>',
-     'https://nzfchildren.org.nz/nzf_5524', False, 2, 20, 400, False, '', None, None, None, None),
-    ('Ibuprofen200norange', 1, False, 0.15, 6, 'three times a day', 10, 400, False, None, None, None, None,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>3 months - 18 years</span> 6 mg/kg per dose (maximum 400mg) every 8 hours as needed for pain or fever. Do not take more than 3 doses in 24 hours.</div></div>',
-     'https://nzfchildren.org.nz/nzf_5524', False, 2, 10, 400, False, '', None, None, None, None),
-    ('Amoxicillin125', 2, False, 0.6, 15, 'three times a day', 40, 1000, False, None, None, None, None,
-     '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 - 30mg/kg (maximum 1,000mg) three times daily </div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Under 15kg</span> 50mg/kg once daily for 10 days<br> <span class=\'age-group\'> 15 - 29.9kg</span> 750mg once daily for 10 days<br><span class=\'age-group\'> 30kg or over</span> 1,000mg once daily for 10 days</div></div>',
-     'https://nzfchildren.org.nz/nzf_3025', True, 2, 40, 1000, True, 'once daily for 10 days', 30, 50, 40, 1000),
-    ("Amoxicillin250", 2, False, 0.3, 15, "three times a day", 20, 1000, True, 0.3, 50, 20, 1000,
-     "<div class='message__section-dosing-item message__section-dosing-label'><strong>General Dosing:</strong> <br> <div class='message__section-dosing-instructions'><span class='age-group'>1 month - 18 years</span> 15 - 30mg/kg (maximum 1,000mg) three times daily </div> <strong>Strep A Dosing:</strong> <div class='message__section-dosing-instructions'><span class='age-group'>Under 15kg</span> 50mg/kg once daily for 10 days<br> <span class='age-group'> 15 - 29.9kg</span> 750mg once daily for 10 days<br><span class='age-group'> 30kg or over</span> 1,000mg once daily for 10 days</div></div>",
-     "https://nzfchildren.org.nz/nzf_3025", True, 2, 40, 1000, True, "once daily for 10 days", 30, 50, 40, 1000),
-    ('Lactulose', 3, False, 0.5, 0.334, "twice daily (adjusted according to response)", 20, 20, False, None, None, None, None,
-    "<div class='message__section-dosing-item message__section-dosing-label'><strong>General Dosing:</strong> <br> <div class='message__section-dosing-instructions'><span class='age-group'>1 month - 1 year</span> 2.5 mL twice daily, adjusted according to response<br><span class='age-group'>1 - 5 years</span> 2.5-10 mL twice daily, adjusted according to response<br><span class='age-group'>5 - 18 years</span> 5-20 mL twice daily, adjusted according to response <br> <span class='age-group'> Note</span> This calculator uses the UpToDate dosing of 0.5 mL/kg</div></div>",
-    "https://nzfchildren.org.nz/nzf_895", False, None, None, None, False, "", None, None, None, None)
+            ('Paracetamol120', 1, False, 0.625, 15, 'every four hours, up to a maximum of four doses in 24 hours', 42,
+             1000, True, 1.25, 30, 62.5, 1500,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter <br> <span class=\'age-group\'> Note</span> A loading dose of 30 mg/kg (maximum 1.5 g) may be given provided there has been no paracetamol given within the preceding 12 hours</div></div>',
+             'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Paracetamol250', 1, False, 0.3, 15, 'every four hours, up to a maximum of four doses in 24 hours', 20,
+             1000, True, 0.6, 30, 30, 1500,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter <br> <span class=\'age-group\'> Note</span> A loading dose of 30 mg/kg (maximum 1.5 g) may be given provided there has been no paracetamol given within the preceding 12 hours</div></div>',
+             'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Paracetamol120nonloading', 1, False, 0.625, 15,
+             'every four hours, up to a maximum of four doses in 24 hours', 42, 1000, False, 1.25, 30, 62.5, 1500,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter</div></div>',
+             'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Paracetamol250nonloading', 1, False, 0.3, 15,
+             'every four hours, up to a maximum of four doses in 24 hours', 20, 1000, False, 0.6, 30, 30, 1500,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter</div></div>',
+             'https://nzfchildren.org.nz/nzf_2439', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Ibuprofen100', 1, False, 0.25, 5, 'three to four times a day', 10, 200, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 - 3 months</span> 5 mg/kg 3-4 times daily <br> <span class=\'age-group\'> 3 months - 18 years</span> 5-10 mg/kg 3 or 4 times daily up to 30 mg/kg daily (maximum 2.4 g daily)</div></div>',
+             'https://nzfchildren.org.nz/nzf_5524', True, 2, 20, 400, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Ibuprofen100norange', 1, False, 0.3, 6, 'three times a day', 20, 400, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>3 months - 18 years</span> 6 mg/kg per dose (maximum 400mg) every 8 hours as needed for pain or fever. Do not take more than 3 doses in 24 hours.</div></div>',
+             'https://nzfchildren.org.nz/nzf_5524', False, 2, 20, 400, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Ibuprofen200norange', 1, False, 0.15, 6, 'three times a day', 10, 400, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>3 months - 18 years</span> 6 mg/kg per dose (maximum 400mg) every 8 hours as needed for pain or fever. Do not take more than 3 doses in 24 hours.</div></div>',
+             'https://nzfchildren.org.nz/nzf_5524', False, 2, 10, 400, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Amoxicillin125', 2, False, 0.6, 15, 'three times a day', 40, 1000, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 - 30mg/kg (maximum 1,000mg) three times daily </div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Under 15kg</span> 50mg/kg once daily for 10 days<br> <span class=\'age-group\'> 15 - 29.9kg</span> 750mg once daily for 10 days<br><span class=\'age-group\'> 30kg or over</span> 1,000mg once daily for 10 days</div></div>',
+             'https://nzfchildren.org.nz/nzf_3025', True, 2, 40, 1000, True, 'once daily for 10 days', 2, 50, 40, 1000, None, None, None, None, None, None),
+            ('Amoxicillin250', 2, False, 0.3, 15, 'three times a day', 20, 1000, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 - 30mg/kg (maximum 1,000mg) three times daily </div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Under 15kg</span> 50mg/kg once daily for 10 days<br> <span class=\'age-group\'> 15 - 29.9kg</span> 750mg once daily for 10 days<br><span class=\'age-group\'> 30kg or over</span> 1,000mg once daily for 10 days</div></div>',
+             'https://nzfchildren.org.nz/nzf_3025', True, 2, 20, 1000, True, 'once daily for 10 days', 1, 50, 20, 1000, None, None, None, None, None, None),
+            ('Cefaclor125', 2, False, 0.4, 10, 'three times a day', 20, 500, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 10 mg/kg (maximum 500 mg) three times daily </div></div>',
+             'https://nzfchildren.org.nz/nzf_3052', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Cefalexin125multi', 2, False, 0.5, 12.5, '(12.5 or 25 mg/kg, see below for indication and frequency)', 40,
+             1000, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>Acute uncomplicated UTIs:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 25 mg/kg (maximum 500mg) THREE times daily for three days; or seven days in moderate to severe infection <span class=\'age-group\'></div> <strong>Mild to moderate cellulitis:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5 mg/kg (maximum 1 g) TWO to FOUR times daily for five days</div><strong>Impetigo with extensive or multiple lesions:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5 - 25 mg/kg (maximum 1 g) TWICE daily</div></div>',
+             'https://nzfchildren.org.nz/nzf_3058', True, 2, 40, 1000, False, '', None, None, None, None, None, None, None, None, None, None),
+            (
+            'Cefalexin250multi', 2, False, 0.25, 12.5, '(12.5 or 25 mg/kg, see below for indication and frequency)', 20,
+            1000, False, None, None, None, None,
+            '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>Acute uncomplicated UTIs:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 25 mg/kg (maximum 500mg) THREE times daily for three days; or seven days in moderate to severe infection <span class=\'age-group\'></div> <strong>Mild to moderate cellulitis:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5 mg/kg (maximum 1 g) TWO to FOUR times daily for five days</div><strong>Impetigo with extensive or multiple lesions:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5 - 25 mg/kg (maximum 1 g) TWICE daily</div></div>',
+            'https://nzfchildren.org.nz/nzf_3058', True, 2, 40, 1000, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Cefalexin125', 2, False, 0.5, 12.5, 'twice <b>OR</b> four times a day', 40, 1000, False, None, None, None,
+             None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5-25 mg/kg (usual maximum 500 mg; up to 1 g may be used), <strong>TWICE</strong> daily for superficial skin infections and <strong>FOUR</strong> times daily for infections due to sensitive Gram-positive and Gram-negative bacteria <br> <span class=\'age-group\'> Note</span> High doses (25 mg/kg) are used in secondary care situations (e.g. step-down dosing from intravenous to oral therapy for bone and joint infections).</div></div>',
+             'https://nzfchildren.org.nz/nzf_3058', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
 
- ]
-# Выполняем вставку
+
+            ('Cefalexin250', 2, False, 0.25, 12.5, 'twice <b>OR</b> four times a day', 20, 1000, False, None, None, None,
+            None,
+            '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5-25 mg/kg (usual maximum 500 mg; up to 1 g may be used), <strong>TWICE</strong> daily for superficial skin infections and <strong>FOUR</strong> times daily for infections due to sensitive Gram-positive and Gram-negative bacteria <br> <span class=\'age-group\'> Note</span> High doses (25 mg/kg) are used in secondary care situations (e.g. step-down dosing from intravenous to oral therapy for bone and joint infections).</div></div>',
+            'https://nzfchildren.org.nz/nzf_3058', False, None, None, None, False, '', None, None, None, None, None, None, None, None, None, None),
+            ('Coamoxiclav125-31.25', 2, False, 0.48, 15, 'three times a day', 20, 625, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15-30 mg/kg (maximum 625 mg) 3 times daily <br> <span class=\'age-group\'> Note</span> Oral doses are expressed as the total dose of amoxicillin + clavulanic acid (ratio 4:1); 15-30 mg of the total (amoxicillin + clavulanic acid) contains 12-24 mg of amoxicillin. </div> <strong>Strep A Dosing (Third or More Episode within 3 months):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child</span>  16.7 mg/kg (maximum dose 833 mg) 3 times daily for 10 days (50 mg/kg daily, maximum 2.5 g daily)</div></div>',
+             'https://nzfchildren.org.nz/nzf_3032', True, 2, 20, 625, True, 'three times daily for 10 days', 0.533,
+             16.7, 26.65, 833, None, None, None, None, None, None),
+            ('Coamoxiclav250-62.5', 2, False, 0.24, 15, 'three times a day', 10, 625, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15-30 mg/kg (maximum 625 mg) 3 times daily <br> <span class=\'age-group\'> Note</span> Oral doses are expressed as the total dose of amoxicillin + clavulanic acid (ratio 4:1); 15-30 mg of the total (amoxicillin + clavulanic acid) contains 12-24 mg of amoxicillin. </div> <strong>Strep A Dosing (Third or More Episode within 3 months):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child</span>  16.7 mg/kg (maximum dose 833 mg) 3 times daily for 10 days (50 mg/kg daily, maximum 2.5 g daily)</div></div>',
+             'https://nzfchildren.org.nz/nzf_3032', True, 2, 10, 625, True, 'three times daily for 10 days', 0.2665,
+             16.7, 13.32, 833, None, None, None, None, None, None),
+            ('Coamoxiclav125-31.25nostrepinfo', 2, False, 0.48, 15, 'three times a day', 20, 625, False, None, None,
+             None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15-30 mg/kg (maximum 625 mg) 3 times daily <br> <span class=\'age-group\'> Note</span> Oral doses are expressed as the total dose of amoxicillin + clavulanic acid (ratio 4:1); 15-30 mg of the total (amoxicillin + clavulanic acid) contains 12-24 mg of amoxicillin. </div> ',
+             'https://nzfchildren.org.nz/nzf_3032', True, 2, 20, 625, True, 'three times daily for 10 days', 0.533,
+             16.7, 26.65, 833, None, None, None, None, None, None),
+            (
+            'Coamoxiclav250-62.5nostrepinfo', 2, False, 0.24, 15, 'three times a day', 10, 625, False, None, None, None,
+            None,
+            '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br><div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15-30 mg/kg (maximum 625 mg) 3 times daily <br> <span class=\'age-group\'> Note</span> Oral doses are expressed as the total dose of amoxicillin + clavulanic acid (ratio 4:1); 15-30 mg of the total (amoxicillin + clavulanic acid) contains 12-24 mg of amoxicillin. </div></div>',
+            'https://nzfchildren.org.nz/nzf_3032', True, 2, 10, 625, True, 'three times daily for 10 days', 0.2665,
+            16.7, 13.32, 833, None, None, None, None, None, None),
+
+
+
+            ('Cotrimoxazole480', 2, False, 0.5, 24, 'twice a day', 20, 960, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>6 weeks - 18 years</span> 24 mg/kg (maximum 960 mg) twice daily </div></div>',
+             'https://nzfchildren.org.nz/nzf_3200', False, None, None, None, False, None, None, None, None, None, None, None, None, None, None, None),
+            ('Erythromycin200', 2, False, 0.25, 10, 'four times a day', 10, 400, False, 0.5, 20, 20, 800,
+             '<div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Note</span> Erythromycin has two forms: erythromycin ethylsuccinate, and erythromycin stearate. This calculator uses the former, and this should be specified on the prescription</div> <div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 10-12.5 mg/kg every 6 hours (usual maximum 1.6 g daily; maximum 4 g daily in severe infection)</div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child</span> 20 mg/kg twice daily; maximum 800 mg twice daily for 10 days</div></div>',
+             'https://nzfchildren.org.nz/nzf_3154', True, 1.25, 10, 400, True, 'twice daily for 10 days', 0.5, 20, 25,
+             1000, None, None, None, None, None, None),
+            ('Erythromycin400', 2, False, 0.125, 10, 'four times a day', 5, 400, False, 0.25, 20, 10, 800,
+             '<div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Note</span> Erythromycin has two forms: erythromycin ethylsuccinate, and erythromycin stearate. This calculator uses the former, and this should be specified on the prescription</div> <div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 10-12.5 mg/kg every 6 hours (usual maximum 1.6 g daily; maximum 4 g daily in severe infection)</div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child</span> 20 mg/kg twice daily; maximum 800 mg twice daily for 10 days</div></div>',
+             'https://nzfchildren.org.nz/nzf_3154', True, 1.25, 5, 400, True, 'twice daily for 10 days', 0.25, 20, 2.5,
+             1000, None, None, None, None, None, None),
+            ('Flucloxacillin125', 2, False, 0.5, 12.5, 'four times a day', 20, 500, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5-25 mg/kg (usually up to 500 mg; maximum 1 g) 4 times daily (see note below) <br> <span class=\'age-group\'> Note</span> High doses (25 mg/kg, maximum 1 g) should be used in severe infection (e.g. step-down therapy from intravenous to oral dosing, or deep site infection). High oral doses may be poorly tolerated due to gastrointestinal adverse effects.</div></div>',
+             'https://nzfchildren.org.nz/nzf_3012', False, None, None, None, False, None, None, None, None, None, None, None, None, None, None, None),
+            ('Flucloxacillin250', 2, False, 0.25, 12.5, 'four times a day', 10, 500, False, None, None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 12.5-25 mg/kg (usually up to 500 mg; maximum 1 g) 4 times daily (see note below) <br> <span class=\'age-group\'> Note</span> High doses (25 mg/kg, maximum 1 g) should be used in severe infection (e.g. step-down therapy from intravenous to oral dosing, or deep site infection). High oral doses may be poorly tolerated due to gastrointestinal adverse effects.</div></div>',
+             'https://nzfchildren.org.nz/nzf_3012', False, None, None, None, False, None, None, None, None, None, None, None, None, None, None, None),
+            ('Lactulose', 3, False, 0.5, 0.334, 'twice daily (adjusted according to response)', 20, 20, False, None,
+             None, None, None,
+             '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 1 years</span> 2.5 mL twice daily, adjusted according to response<br><span class=\'age-group\'>1 - 5 years</span> 2.5-10 mL twice daily, adjusted according to response<br><span class=\'age-group\'>5 - 18 years</span> 5-20 mL twice daily, adjusted according to response <br> <span class=\'age-group\'> Note</span> This calculator uses the UpToDate dosing of 0.5 mL/kg</div></div>',
+             'https://nzfchildren.org.nz/nzf_895', False, None, None, None, False, None, None, None, None, None, None, None, None, None, None, None),
+
+
+('Macrogol', 3, False, 0.038, 0.5, 'daily', 8, 105, False, None, None, None, None,
+ '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>12 - 18 years</span> 1 sachet once daily, increase to 2-3 sachets daily if required; contents of each sachet dissolved in half a glass (approximately 125 mL) of water<br><span class=\'age-group\'>2 - 18 years</span> The NZF only provides dosing advise for the unfunded Lax-Sachets Half for this age group. Therefore this calculator uses 1.5g/kg for disimpaction (<a href=\'https://www.starship.org.nz/for-health-professionals/starship-clinical-guidelines/c/constipation/\' target=\'_blank\'>starship</a> advises 1-1.5g/kg), and a maintenance dose of 0.5g/kg </div></div>',
+ 'https://nzfchildren.org.nz/nzf_897', False, None, None, None, False, None, None, None, 8, 105, None, None, None, None, None, None),
+]
+
+            # ('Loratadine', 3, False, None, None, 'once a day', None, None, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 - 2 years</span> 2.5 mg once daily<br><span class=\'age-group\'>2 - 12 years under 30kg</span> 5 mg once daily<br><span class=\'age-group\'>2 - 12 years over 30kg</span> 10 mg once daily<br> <span class=\'age-group\'>12 - 18 years</span> 10 mg once daily</div></div>',
+            #  'https://nzfchildren.org.nz/nzf_1848', True, None, None, None, False, None, 30, 9999, 5, 5, 10, 10,
+            #  '<br><br>(2.5 mLs if 1-2 years)', '<br><br>(2.5 mgs if 1-2 years)'),
+
+            # ('Penicillin125', 2, False, 0.25, 6.25, 'four times a day', 20, 500, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 6.25-12.5 mg/kg (maximum 250-500 mg) 4 times daily </div><strong>Strep A Dosing (First and Second Episodes):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Under 20kg</span> 250 mg 2-3 times daily for 10 days<br><span class=\'age-group\'> Over 20kg</span> 500 mg 2-3 times daily for 10 days</div><strong>Strep A Dosing (Third or More Episode within 3 months):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Child</span> 12.5 mg/kg (maximum 500 mg) 4 times daily for 10 days, in combination with <a href=\'https://nzfchildren.org.nz/nzf_3243\' target=\'_blank\'>rifampicin</a> at 20 mg/kg (maximum 600 mg) once daily for 4 days, beginning on day 7 of the phenoxymethylpenicillin or amoxicillin course (requires specialist approval)</div></div>',
+            #  'https://nzfchildren.org.nz/nzf_3006', True, 2, 20, 500, True, True,
+            #  ' two to three times daily for ten days', 10, 20, 10, 500, 20, 500, 250, 500, '', ''),
+            # ('Penicillin250', 2, False, 0.125, 6.25, 'four times a day', 10, 500, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 6.25-12.5 mg/kg (maximum 250-500 mg) 4 times daily </div><strong>Strep A Dosing (First and Second Episodes):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Under 20kg</span> 250 mg 2-3 times daily for 10 days<br><span class=\'age-group\'> Over 20kg</span> 500 mg 2-3 times daily for 10 days</div><strong>Strep A Dosing (Third or More Episode within 3 months):</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'> Child</span> 12.5 mg/kg (maximum 500 mg) 4 times daily for 10 days, in combination with <a href=\'https://nzfchildren.org.nz/nzf_3243\' target=\'_blank\'>rifampicin</a> at 20 mg/kg (maximum 600 mg) once daily for 4 days, beginning on day 7 of the phenoxymethylpenicillin or amoxicillin course (requires specialist approval)</div></div>',
+            #  'https://nzfchildren.org.nz/nzf_3006', True, 2, 10, 500, True, False,
+            #  ' two to three times daily for ten days', 5, 10, 5, 500, 10, 500, 250, 500, '', ''),
+
+
+            #  ('Prednisolone', 3, False, 0.2, 1, 'once a day', 8, 40, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child</span> 1-2 mg/kg (maximum 40 mg) once daily for 3-5 days; if child has been taking an oral corticosteroid for more than a few days, give 2 mg/kg (maximum 60 mg) once daily for at least 5 days </div></div>',
+            #  'https://nzfchildren.org.nz/nzf_3846', True, 2, 8, 40, False, None, None, None, None, None, None, None,
+            #  None, None, None, None, None,
+            #  '<br><br>If child has been taking an oral corticosteroid for more than a few days, give 2 mg/kg (i.e. 0.4mL/kg, with a higher maximum of 12mL) once daily',
+            #  '<br><br>If child has been taking an oral corticosteroid for more than a few days, give 2 mg/kg (higher maximum of 60mg) once daily'),
+            # # ('Roxithromycin', 2, True, None, 2.5, 'twice daily', None, 150, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>under 40 kg</span> 2.5-4 mg/kg (maximum 150 mg) twice daily <br><span class=\'age-group\'>over 40 kg</span> 150 mg twice daily </div> <strong>Strep A Dosing:</strong> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>under 40 kg</span> 2.5 mg/kg twice daily for 10 days<br> <span class=\'age-group\'> over 40 kg </span> 150 mg twice daily for 10 days<br></div></div>',
+            #  'https://nzfchildren.org.nz/nzf_3161', True, 1.6, None, 150, True, False, ' twice daily for 10 days', None,
+            #  None, None, None, None, None, None, None, None, None, None, None, '', ''),
+            # ('Ferrous_sulphate', 3, False, 0.25, 1.5, 'twice a day', 7.5, 45, False, None, None, None, None,
+            #  '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>Child 1 month - 12 years</span> 0.5-1 mL/kg daily up to maximum 30 mL daily in 2-3 divided doses <br><span class=\'age-group\'>Child 12 - 18 years</span> 15-30 mL daily in 1-2 divided doses</div></div>',
+            #  'https://nzfchildren.org.nz/nzf_4915', True, 2, 15, 90, False, None, None, None, None, None, None, 0.33, 2,
+            #  None, 'daily', '', ' of equivalent elemental iron', None, None, '', ' of equivalent elemental iron')
+
+#Выполняем вставку
 
     #     cursor.executemany('''INSERT INTO drugs
     # (name, category_id, tablet_only, mls_var, mgs_var, number_of_times_a_day,
@@ -146,8 +248,8 @@ def initialize_database():
     #  mls_max_loading, mgs_max_loading, instructions, nzf_link,
     #  high_range, high_modifier, mls_max_high, mgs_max_high,
     #  strep_drug, strep_frequency, mls_var_strep, mgs_var_strep,
-    #  mls_strep_max, mgs_strep_max)
-    # VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', drugs_data)
+    #  mls_strep_max, mgs_strep_max, weight_cutoff_1, weight_cutoff_2, range1_dose, range2_dose, form, age_range)
+    # VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''', drugs_data)
 
         products = [
             ('HP Pavilion Laptop', 'Electronics', 10.99, 10),
@@ -344,12 +446,12 @@ def calculate_dosage():
                 user_id, calculation_id, drug_id, drug_name, username, weight, dosage_mls, dosage_mgs,
                 totalMgs, totalhigh, totalhighsachets, maximumMgsPerDay, highMgs,
                 loading_dose, strep_drug, messageMgs, messageOther, calculation_type,
-                calculation_status, calculation_version, patient_id, patient_name, error_message
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)''',
+                calculation_status, calculation_version, patient_id, patient_name, error_message, age
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)''',
                        (
                            user_id, None, drug_id, name, 'Username', weight, mls_total, mgs_total,
                            0, 0, 0, 0, 0, 0, 0, 'Message', None, category_id,
-                           'Status', 'Version', 0, 'Patient Name', None
+                           'Status', 'Version', 0, 'Patient Name', None , None
                        ))
         # Получаем автоматически сгенерированный id
         calculation_id = cursor.lastrowid

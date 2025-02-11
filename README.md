@@ -139,3 +139,29 @@ CREATE TABLE IF NOT EXISTS calculation_history (
     error_message TEXT,                 -- Лог ошибки (если расчет завершился ошибкой)
     calculation_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP -- Время выполнения расчета
 );
+
+name: 'Paracetamol120' — название препарата.
+category_id: 1 — ID категории (предполагаем, что 1 — категория "Анальгетики").
+tablet_only: False — не таблетированная форма.
+mls_var: 0.625 — мл на кг веса для стандартной дозы.
+mgs_var: 15 — мг на кг веса для стандартной дозы.
+number_of_times_a_day: 'every four hours, up to a maximum of four doses in 24 hours' — частота приема.
+mls_max: 42 — максимальный объем (мл) за один прием.
+mgs_max: 1000 — максимальная доза (мг) за один прием.
+loading_dose: True — загрузочная доза разрешена.
+mls_var_loading: 1.25 — мл на кг веса для загрузочной дозы.
+mgs_var_loading: 30 — мг на кг веса для загрузочной дозы.
+mls_max_loading: 62.5 — максимальный объем (мл) для загрузочной дозы.
+mgs_max_loading: 1500 — максимальная доза (мг) для загрузочной дозы.
+instructions: '<div class=\'message__section-dosing-item message__section-dosing-label\'><strong>General Dosing:</strong> <br> <div class=\'message__section-dosing-instructions\'><span class=\'age-group\'>1 month - 18 years</span> 15 mg/kg per dose (maximum 1 g) every four hours; maximum 75 mg/kg per day (without exceeding 4 g) for 48 hours, maximum of 60 mg/kg per day (without exceeding 4 g) thereafter <br> <span class=\'age-group\'> Note</span> A loading dose of 30 mg/kg (maximum 1.5 g) may be given provided there has been no paracetamol given within the preceding 12 hours</div></div>' — инструкции по применению.
+nzf_link: 'https://nzfchildren.org.nz/nzf_2439' — ссылка на источник.
+high_range: False — нет диапазона верхней дозы.
+high_modifier: None — модификатор верхней дозы не указан.
+mls_max_high: None — максимальный объем для верхней дозы не указан.
+mgs_max_high: None — максимальная доза для верхней дозы не указан.
+strep_drug: False — не используется для лечения стрептококковой инфекции.
+strep_frequency: '' — частота приема для стрептококковой инфекции не указана.
+mls_var_strep: None — мл на кг веса для стрептококковой инфекции не указаны.
+mgs_var_strep: None — мг на кг веса для стрептококковой инфекции не указаны.
+mls_strep_max: None — максимальный объем для стрептококковой инфекции не указан.
+mgs_strep_max: None — максимальная доза для стрептококковой инфекции не указана.
