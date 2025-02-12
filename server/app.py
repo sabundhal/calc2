@@ -1,9 +1,12 @@
 from flask import Flask, jsonify, request
+import requests
 from flask_jwt_extended import JWTManager, create_access_token, jwt_required, get_jwt_identity
 from flask_cors import CORS
 import sqlite3
 import hashlib
 from antipyretic_calculator import calculateAntipyreticDosage
+import os
+from dotenv import load_dotenv
 
 ##
 # Создание Flask-приложения
@@ -348,6 +351,39 @@ def login_user():
     access_token = create_access_token(identity=username)
     # Возвращаем токен и user_id
     return jsonify(access_token=access_token, user_id=user_id), 200
+
+###yandex
+# Загрузите Client Secret из переменных окружения
+CLIENT_ID = os.getenv("YANDEX_CLIENT_ID")
+CLIENT_SECRET = os.getenv("YANDEX_CLIENT_SECRET")
+
+@app.route('/api/auth/yandex', methods=['POST'])
+def handle_yandex_auth():
+    token = request.json.get('token')
+
+    if not token:
+        return jsonify({"error": "Токен отсутствует"}), 400
+
+    try:
+        # Получаем данные пользователя
+        user_info = get_user_info(token)
+        return jsonify({"success": True, "user": user_info})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_user_info(token):
+    url = "https://login.yandex.ru/info"
+    headers = {"Authorization": f"OAuth {token}"}
+    params = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+    }
+    response = requests.get(url, headers=headers, params=params)
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Ошибка: {response.status_code}, {response.text}")
+
 
 ###Calculator
 @app.route('/api/drugs', methods=['GET'])

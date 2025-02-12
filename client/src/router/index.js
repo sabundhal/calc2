@@ -7,6 +7,7 @@ import Account from '../components/Account.vue';
 import Main from '../components/Main.vue';
 import Pediatric from '../components/Pediatric.vue';
 import CalculationHistory from '../components/CalculationHistory.vue';
+import TokenHandler from '../components/TokenHandler.vue';
 
 const routes = [
   {
@@ -27,6 +28,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/tokenhandler',
+    name: 'TokenHandler',
+    component: TokenHandler,
   },
   {
     path: '/main',
